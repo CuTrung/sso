@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     Int                      @id @default(autoincrement())
+  name                   String?
+  email                  String                   @unique
+  password               String
+  phoneNumber            String?                  @unique
+  active                 Int                      @default(1)
+  devices                Device[]
+  User_Application       User_Application[]
+  User_IndentityProvider User_IndentityProvider[]
+  sessions               Session[]
+  TrackingAdmin          TrackingAdmin[]
+}
+
+model User_Application {
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+  application   Application @relation(fields: [applicationId], references: [id])
+  applicationId Int
+
+  @@id([userId, applicationId])
+}
+
+model Application {
+  id               Int                @id @default(autoincrement())
+  url              String
+  active           Int                @default(1)
+  User_Application User_Application[]
+}
+
+model Device {
+  id     Int    @id @default(autoincrement())
+  name   String
+  ip     String
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Role {
+  id         Int          @id @default(autoincrement())
+  action     String
+  Group_Role Group_Role[]
+}
+
+model Group_Role {
+  role    Role  @relation(fields: [roleId], references: [id])
+  roleId  Int
+  group   Group @relation(fields: [groupId], references: [id])
+  groupId Int
+
+  @@id([roleId, groupId])
+}
+
+model Group {
+  id         Int          @id @default(autoincrement())
+  name       String
+  Group_Role Group_Role[]
+}
+
+model IndentityProvider {
+  id                     Int                      @id @default(autoincrement())
+  name                   String
+  User_IndentityProvider User_IndentityProvider[]
+}
+
+model User_IndentityProvider {
+  user                User              @relation(fields: [userId], references: [id])
+  userId              Int
+  indentityProvider   IndentityProvider @relation(fields: [indentityProviderId], references: [id])
+  indentityProviderId Int
+
+  @@id([userId, indentityProviderId])
+}
+
+model Session {
+  id           Int    @id @default(autoincrement())
+  refreshToken String
+  user         User   @relation(fields: [userId], references: [id])
+  userId       Int
+}
+
+model TrackingAdmin {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
