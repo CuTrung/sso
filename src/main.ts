@@ -1,19 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { AuthenticationGuard } from './auth/authentication/authentication.guard';
-import { connectSwagger } from './configs/index.config';
-import { MicroservicesService } from './microservices/microservices.service';
+import { AppModule } from '@v1/modules/app/app.module';
+import indexConfig from '@v1/configs/index.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    credentials: true,
-  });
-  connectSwagger(app);
-
-  new MicroservicesService().initAllMicroservices(app);
-  app.useGlobalGuards(new AuthenticationGuard());
-
+  indexConfig(app);
   await app.listen(process.env.PORT || 3000);
+  return app;
 }
-bootstrap();
+
+export default bootstrap();
